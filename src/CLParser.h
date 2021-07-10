@@ -11,6 +11,7 @@
 #include <sstream>
 #include <cstring>
 #include <iostream>
+#include <string.h>
 
 class CLParser {
 public:
@@ -24,7 +25,8 @@ public:
 	};
 
 	struct Argument {
-		Argument() : required(false), help("Default help message."), arg_type(kString), default_value(false) {}
+		Argument() : required(false), help("Default help message."), arg_type(kString), default_value(false), flag_value(false), int_value(-1), float_value(-1), string_value(
+				nullptr), array_value(nullptr) {}
 		std::vector <std::string> long_name;
 		std::vector <std::string> short_name;
 		ArgType arg_type;
@@ -32,13 +34,12 @@ public:
 //		std::string action;
 		bool default_value;
 		bool required;
-		union {
-			bool flag_value;
-			int int_value;
-			float float_value;
-			char *string_value;
-			char **array_value;
-		};
+		// This didn't work in a union because of the string value for some reason...
+		bool flag_value;
+		int int_value;
+		float float_value;
+		char *string_value;
+		char **array_value;
 	};
 
 	CLParser() {
