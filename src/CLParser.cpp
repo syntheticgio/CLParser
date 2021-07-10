@@ -16,10 +16,11 @@ bool CLParser::parseArguments(int argc, char **argv) {
 
 			for (auto &it : registered_arguments_) {
 				for (auto &it2 : it.second.long_name) {
-					char str[it2.length() + 2];
+					int arg_size = it2.length() + 2;
+					char str[arg_size];
 					strcpy(str, "--");
 					strcat(str, it2.c_str());
-					if (strncmp(argv[i], str, it2.length()) == 0) {
+					if (strncmp(argv[i], str, arg_size) == 0) {
 						// Match
 						std::cout << "MATCH - " << it2 << std::endl;
 						matched_name = it2;
@@ -34,10 +35,11 @@ bool CLParser::parseArguments(int argc, char **argv) {
 
 			for (auto &it : registered_arguments_) {
 				for (auto &it2 : it.second.short_name) {
-					char str[it2.length() + 2];
+					int arg_size = it2.length() + 2;
+					char str[arg_size];
 					strcpy(str, "--");
 					strcat(str, it2.c_str());
-					if (strncmp(argv[i], str, it2.length()) == 0) {
+					if (strncmp(argv[i], str, arg_size) == 0) {
 						// Match
 						std::cout << "MATCH - " << it2 << std::endl;
 						matched_name = it2;
