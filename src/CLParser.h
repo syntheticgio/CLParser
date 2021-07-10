@@ -11,7 +11,8 @@
 #include <sstream>
 #include <cstring>
 #include <iostream>
-#include <string.h>
+#include <cstring>
+#include <algorithm>
 
 class CLParser {
 public:
@@ -45,6 +46,13 @@ public:
 	CLParser() {
 		current_arg_number_ = 0;
 		current_arg_name_ = "";
+
+		// Add Help Argument by default
+		addArgument("help");
+		addArgumentLongName("help");
+		addArgumentShortName("h");
+		addArgumentType(CLParser::kBool);
+		addArgumentHelp("This is the built in help.  Running with this flag will print out help for all possible arguments registered.");
 	}
 
 	/**
@@ -78,29 +86,42 @@ public:
 	 * @param default_val
 	 * @param help
 	 */
-	void addFullArgument(std::vector<std::string> &long_name, std::vector<std::string> &short_name, ArgType arg_type, void * default_val, std::string &help);
+//	void addFullArgument(std::vector<std::string> &long_name, std::vector<std::string> &short_name, ArgType arg_type, void * default_val, std::string &help);
 
 	/**
-	 * Registers a new argument.
+	 * @brief Register argument.
+	 * Register an argument with a generic argument name.
+	 * @return false on failure, true on success.
 	 */
-	void addArgument() {
-		Argument new_arg = Argument();
-
+	bool addArgument() {
 		std::stringstream arg_name;
 		arg_name << "Arg" << current_arg_number_;
+		if (registered_arguments_.find(arg_name.str()) != registered_arguments_.end()) {
+			std::cerr << "The argument " << arg_name.str() << " is currently in use.  NOT registering argument.";
+			return false;
+		}
+		Argument new_arg = Argument();
 		registered_arguments_[arg_name.str()] = new_arg;
 		current_arg_number_++;
 		current_arg_name_ = arg_name.str();
+		return true;
 	}
 
 	/**
+	 * @brief Registers argument.
 	 * Registers a new argument and names it for reference.
 	 * @param argument_name General name for the argument for future referencing
+	 * @return false on failure, true on success.
 	 */
-	void addArgument(const std::string& argument_name) {
+	bool addArgument(const std::string& argument_name) {
+		if (registered_arguments_.find(argument_name) != registered_arguments_.end()) {
+			std::cerr << "The argument " << argument_name << " is currently in use.  NOT registering argument.";
+			return false;
+		}
 		Argument new_arg = Argument();
 		registered_arguments_[argument_name] = new_arg;
 		current_arg_name_ = argument_name;
+		return true;
 	}
 
 	/**
@@ -109,35 +130,69 @@ public:
 	 * Add an argument long name (without the '--' included).
 	 * @param long_name
 	 */
-	void addArgumentLongName(const std::string &long_name) {
+	bool addArgumentLongName(const std::string &long_name) {
+		if (std::find(registered_arguments_[current_arg_name_].long_name.begin(),
+					  registered_arguments_[current_arg_name_].long_name.end(), long_name)
+					  != registered_arguments_[current_arg_name_].long_name.end()) {
+			// Already present.
+			std::cerr << "Long name --" << long_name << " is already present in this argument (" << current_arg_name_ << ") long name parameters.  Skipping.\n";
+			return false;
+		}
 		registered_arguments_[current_arg_name_].long_name.push_back(long_name);
+		return true;
 	}
 
  	/**
 	 *
 	 * @param long_name
 	 */
-	void addArgumentLongName(std::vector<std::string> &long_name) {
+	bool addArgumentLongName(std::vector<std::string> &long_name) {
+		bool success = true;
 		for (auto &it : long_name) {
+			if (std::find(registered_arguments_[current_arg_name_].long_name.begin(),
+						  registered_arguments_[current_arg_name_].long_name.end(), it)
+				!= registered_arguments_[current_arg_name_].long_name.end()) {
+				// Already present.
+				std::cerr << "Long name --" << it << " is already present in this argument (" << current_arg_name_ << ") long name parameters.  Skipping.\n";
+				success = false;
+			}
 			registered_arguments_[current_arg_name_].long_name.push_back(it);
 		}
+		return success;
 	}
 	/**
 	 *
 	 * @param short_name
 	 */
-	void addArgumentShortName(const std::string &short_name) {
+	bool addArgumentShortName(const std::string &short_name) {
+		if (std::find(registered_arguments_[current_arg_name_].long_name.begin(),
+					  registered_arguments_[current_arg_name_].long_name.end(), short_name)
+			!= registered_arguments_[current_arg_name_].long_name.end()) {
+			// Already present.
+			std::cerr << "Short name --" << short_name << " is already present in this argument (" << current_arg_name_ << ") short name parameters.  Skipping.\n";
+			return false;
+		}
 		registered_arguments_[current_arg_name_].short_name.push_back(short_name);
+		return true;
 	}
 
 	/**
 	 *
 	 * @param short_name
 	 */
-	void addArgumentShortName(std::vector<std::string> &short_name) {
+	bool addArgumentShortName(std::vector<std::string> &short_name) {
+		bool success = true;
 		for (auto &it : short_name) {
+			if (std::find(registered_arguments_[current_arg_name_].long_name.begin(),
+						  registered_arguments_[current_arg_name_].long_name.end(), it)
+				!= registered_arguments_[current_arg_name_].long_name.end()) {
+				// Already present.
+				std::cerr << "Short name --" << it << " is already present in this argument (" << current_arg_name_ << ") short name parameters.  Skipping.\n";
+				success = false;
+			}
 			registered_arguments_[current_arg_name_].short_name.push_back(it);
 		}
+		return success;
 	}
 	/**
 	 *
@@ -241,6 +296,21 @@ public:
 		return false;
 	}
 
+	void printArgumentHelp() {
+		std::cout << "Command Line Parameter Help\n";
+		std::cout << "===========================\n";
+		std::cout << "Usage:\n";
+		std::cout << "\t"
+
+		for (auto const& [key, val] : registered_arguments_)
+		{
+
+			std::cout << key        // string (key)
+					  << ':'
+					  << val        // string's value
+					  << std::endl;
+		}
+	}
 
 
 	/**
