@@ -200,16 +200,12 @@ public:
 	 */
 	void addArgumentType(ArgType argument_type) {
 		registered_arguments_[current_arg_name_].arg_type = argument_type;
-		if (argument_type == kString) {
-			// TODO: Should we set something here?  Default doesn't make much sense
-		} else if (argument_type == kBool) {
+		if (argument_type == kBool) {
 			// Default flag value is false (or OFF) if not pre-set
 			if (!registered_arguments_[current_arg_name_].default_value) {
 				registered_arguments_[current_arg_name_].flag_value = false;
 				registered_arguments_[current_arg_name_].default_value = true;
 			}
-		} else if (argument_type == kArray) {
-			// TODO: Set something here?  Default doesn't make much sense
 		} else if (argument_type == kFloat) {
 			// Set default value if not already set for FLOAT as 0.0
 			if (!registered_arguments_[current_arg_name_].default_value) {
