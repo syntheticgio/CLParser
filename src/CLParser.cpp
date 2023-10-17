@@ -19,7 +19,6 @@ bool CLParser::parseArguments(int argc, char **argv) {
 					// cppcheck-suppress useStlAlgorithm
 					if (std::string(argv[i]) == std::string("--" + it2)) {
 						// Match
-						std::cout << "MATCH - " << it2 << std::endl;
 						matched_name = it2;
 						arg = &registered_arguments_[it.first];
 						break;
@@ -35,7 +34,6 @@ bool CLParser::parseArguments(int argc, char **argv) {
 					// cppcheck-suppress useStlAlgorithm
 					if (std::string(argv[i]) == std::string("-" + it2)) {
 						// Match
-						std::cout << "MATCH - " << it2 << std::endl;
 						matched_name = it2;
 						arg = &registered_arguments_[it.first];
 						break;
