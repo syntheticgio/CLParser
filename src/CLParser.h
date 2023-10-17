@@ -5,6 +5,11 @@
 #ifndef CLPARSER_CLPARSER_H
 #define CLPARSER_CLPARSER_H
 
+// C Includes
+// #include <string.h> 
+// #include <stdio.h>
+// #include <stdlib.h>
+
 #include <string>
 #include <vector>
 #include <map>
@@ -13,6 +18,13 @@
 #include <iostream>
 #include <cstring>
 #include <algorithm>
+
+
+// std::ostream & operator << (std::ostream &out, const CLParser::Argument &c)
+// {
+//     out << c.help;
+//     return out;
+// }
 
 class CLParser {
 public:
@@ -25,27 +37,31 @@ public:
 		kArray = 5
 	};
 
-	struct Argument {
-		Argument() : required(false), help("Default help message."), arg_type(kString), default_value(false), flag_value(false), int_value(-1), float_value(-1), string_value(
-				nullptr), array_value(nullptr) {}
-		std::vector <std::string> long_name;
-		std::vector <std::string> short_name;
-		ArgType arg_type;
-		std::string help;
-//		std::string action;
-		bool default_value;
-		bool required;
-		// This didn't work in a union because of the string value for some reason...
-		bool flag_value;
-		int int_value;
-		float float_value;
-		char *string_value;
-		char **array_value;
+	class Argument {
+		public:
+			Argument() : required(false), help("Default help message."), arg_type(kString), default_value(false), flag_value(false), int_value(-1), float_value(-1), string_value(
+					nullptr), array_value(nullptr) {}
+			
+			~Argument() {};
+
+			std::vector <std::string> long_name;
+			std::vector <std::string> short_name;
+			ArgType arg_type;
+			std::string help;
+	//		std::string action;
+			bool default_value;
+			bool required;
+			// This didn't work in a union because of the string value for some reason...
+			bool flag_value;
+			int int_value;
+			float float_value;
+			char *string_value;
+			char **array_value;
 	};
 
-	CLParser() {
-		current_arg_number_ = 0;
-		current_arg_name_ = "";
+	CLParser() : current_arg_name_(""), current_arg_number_(0) {
+		// current_arg_number_ = 0;
+		// current_arg_name_ = "";
 
 		// Add Help Argument by default
 		addArgument("help");
@@ -100,7 +116,7 @@ public:
 			std::cerr << "The argument " << arg_name.str() << " is currently in use.  NOT registering argument.";
 			return false;
 		}
-		Argument new_arg = Argument();
+		Argument new_arg; 
 		registered_arguments_[arg_name.str()] = new_arg;
 		current_arg_number_++;
 		current_arg_name_ = arg_name.str();
@@ -296,14 +312,14 @@ public:
 		std::cout << "Command Line Parameter Help\n";
 		std::cout << "===========================\n";
 		std::cout << "Usage:\n";
-		std::cout << "\t"
+		std::cout << "\t";
 
 		for (auto const& [key, val] : registered_arguments_)
 		{
 
 			std::cout << key        // string (key)
 					  << ':'
-					  << val        // string's value
+					  << val.help        // string's value
 					  << std::endl;
 		}
 	}
